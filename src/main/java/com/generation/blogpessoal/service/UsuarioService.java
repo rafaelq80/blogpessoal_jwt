@@ -11,9 +11,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.generation.blogpessoal.model.ResponseLogin;
+import com.generation.blogpessoal.model.LoginDto;
 import com.generation.blogpessoal.model.Usuario;
-import com.generation.blogpessoal.model.RequestLogin;
 import com.generation.blogpessoal.repository.UsuarioRepository;
 import com.generation.blogpessoal.security.JwtService;
 
@@ -60,21 +59,25 @@ public class UsuarioService {
 	
 	}	
 
-	public Optional<ResponseLogin> autenticarUsuario(Optional<RequestLogin> usuarioLogin) {
+	public Optional<LoginDto> autenticarUsuario(Optional<LoginDto> loginDto) {
         
-		Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(usuarioLogin.get().getUsuario(), usuarioLogin.get().getSenha()));
+		var credenciais = new UsernamePasswordAuthenticationToken(loginDto.get().getUsuario(), loginDto.get().getSenha());
+		
+		Authentication authentication = authenticationManager.authenticate(credenciais);
         
 		if (authentication.isAuthenticated()) {
 
-			Optional<Usuario> buscaUsuario = usuarioRepository.findByUsuario(usuarioLogin.get().getUsuario());
+			Optional<Usuario> usuario = usuarioRepository.findByUsuario(loginDto.get().getUsuario());
 
-			if (buscaUsuario.isPresent()) {
+			if (usuario.isPresent()) {
 
-				String token = gerarToken(usuarioLogin.get().getUsuario());
-				
-				ResponseLogin responseLogin = new ResponseLogin(buscaUsuario.get().getId(), token);
-
-				return Optional.of(responseLogin);
+				loginDto.get().setId(usuario.get().getId());
+                loginDto.get().setNome(usuario.get().getNome());
+                loginDto.get().setFoto(usuario.get().getFoto());
+                loginDto.get().setToken(gerarToken(loginDto.get().getUsuario()));
+                loginDto.get().setSenha("");
+								
+				return loginDto;
 			
 			}
 
