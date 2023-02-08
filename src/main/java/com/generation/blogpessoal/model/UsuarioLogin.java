@@ -1,6 +1,6 @@
 package com.generation.blogpessoal.model;
 
-public class LoginDto {
+public class UsuarioLogin {
 	
 	private Long id;
 	private String nome;

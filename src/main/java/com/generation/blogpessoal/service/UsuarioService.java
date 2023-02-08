@@ -11,7 +11,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.generation.blogpessoal.model.LoginDto;
+import com.generation.blogpessoal.model.UsuarioLogin;
 import com.generation.blogpessoal.model.Usuario;
 import com.generation.blogpessoal.repository.UsuarioRepository;
 import com.generation.blogpessoal.security.JwtService;
@@ -46,8 +46,7 @@ public class UsuarioService {
 			Optional<Usuario> buscaUsuario = usuarioRepository.findByUsuario(usuario.getUsuario());
 
 			if ( (buscaUsuario.isPresent()) && ( buscaUsuario.get().getId() != usuario.getId()))
-				throw new ResponseStatusException(
-						HttpStatus.BAD_REQUEST, "Usuário já existe!", null);
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Usuário já existe!", null);
 
 			usuario.setSenha(criptografarSenha(usuario.getSenha()));
 
@@ -59,25 +58,25 @@ public class UsuarioService {
 	
 	}	
 
-	public Optional<LoginDto> autenticarUsuario(Optional<LoginDto> loginDto) {
+	public Optional<UsuarioLogin> autenticarUsuario(Optional<UsuarioLogin> usuarioLogin) {
         
-		var credenciais = new UsernamePasswordAuthenticationToken(loginDto.get().getUsuario(), loginDto.get().getSenha());
+		var credenciais = new UsernamePasswordAuthenticationToken(usuarioLogin.get().getUsuario(), usuarioLogin.get().getSenha());
 		
 		Authentication authentication = authenticationManager.authenticate(credenciais);
         
 		if (authentication.isAuthenticated()) {
 
-			Optional<Usuario> usuario = usuarioRepository.findByUsuario(loginDto.get().getUsuario());
+			Optional<Usuario> usuario = usuarioRepository.findByUsuario(usuarioLogin.get().getUsuario());
 
 			if (usuario.isPresent()) {
 
-				loginDto.get().setId(usuario.get().getId());
-                loginDto.get().setNome(usuario.get().getNome());
-                loginDto.get().setFoto(usuario.get().getFoto());
-                loginDto.get().setToken(gerarToken(loginDto.get().getUsuario()));
-                loginDto.get().setSenha("");
+				usuarioLogin.get().setId(usuario.get().getId());
+                usuarioLogin.get().setNome(usuario.get().getNome());
+                usuarioLogin.get().setFoto(usuario.get().getFoto());
+                usuarioLogin.get().setToken(gerarToken(usuarioLogin.get().getUsuario()));
+                usuarioLogin.get().setSenha("");
 								
-				return loginDto;
+				return usuarioLogin;
 			
 			}
 
