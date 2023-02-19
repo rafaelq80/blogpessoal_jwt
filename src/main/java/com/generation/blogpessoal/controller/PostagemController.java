@@ -74,16 +74,16 @@ public class PostagemController {
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 		
 	}
-
+	
+	@ResponseStatus(HttpStatus.NO_CONTENT)
 	@DeleteMapping("/{id}")
-	public ResponseEntity<?> deletePostagem(@PathVariable Long id) {
+	public void delete(@PathVariable Long id) {
+		Optional<Postagem> postagem = postagemRepository.findById(id);
 		
-		return postagemRepository.findById(id)
-				.map(resposta -> {
-					postagemRepository.deleteById(id);
-					return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-				})
-				.orElse(ResponseEntity.notFound().build());
+		if(postagem.isEmpty())
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+		
+		postagemRepository.deleteById(id);				
 	}
 	
 }
